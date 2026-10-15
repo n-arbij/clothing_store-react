@@ -10,7 +10,7 @@
   color: var(--text);
   background: #fff;
   border-bottom: 1px solid var(--border);
-  padding: 0 16px;
+  padding: 10px 20px;
 }
 
 .header a {
@@ -24,16 +24,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 48px;
-}
-
-.logo {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
+  height: 60px;
 }
 
 .logo-text {
@@ -57,10 +48,9 @@
 /* ---------- Row 2 ---------- */
 .header-main {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   gap: 10px;
-  height: 56px;
+  height: 55px;
 }
 
 .pill-wrap {
@@ -165,7 +155,6 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-left: auto;
 }
 
 .icon-btn {
