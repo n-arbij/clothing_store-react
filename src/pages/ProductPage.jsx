@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { ShoppingBag, Heart, Truck, Star, ChevronRight } from 'lucide-react';
 import { formatPrice } from '../util/price';
 import { mockProducts } from '../data/mockProduct'
+import { useCart } from '../context/CartContext';
 import './ProductPage.css';
 
 function StarRating({ rating }) {
@@ -38,10 +39,8 @@ export default function ProductPage() {
     : [variant?.imageUrl ?? product.imageUrl];
   const [imgIndex, setImgIndex] = useState(0);
 
-  const handleAdd = () => {
-    // TODO: cart context — add { variantId: variant.id, quantity: 1 }
-    console.log('add to cart', variant);
-  };
+  const { addItem } = useCart();
+  const handleAdd = () => addItem(variant.id);
 
   return (
     <main className="pdp">
