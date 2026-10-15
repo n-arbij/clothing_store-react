@@ -179,6 +179,23 @@
   background: var(--hover);
 }
 
+.cart-btn { position: relative; }
+.cart-count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #18181b;
+  color: #fff;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 @media (max-width: 900px) {
   .top-links a {
     display: none;
