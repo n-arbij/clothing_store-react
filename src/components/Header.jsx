@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { ChevronDown, Search, ShoppingBag, Heart} from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Search, ShoppingBag, Heart} from 'lucide-react';
+import { useCart } from '../context/CartContext';
 import './Header.css';
 
 const categories = ['Men', 'Women', 'Children', 'Accessories', 'Sale'];
@@ -38,6 +40,7 @@ const categories = ['Men', 'Women', 'Children', 'Accessories', 'Sale'];
 
 export default function Header() {
   const [query, setQuery] = useState('');
+  const { count } = useCart();
 
   return (
     <header className="header">
@@ -64,9 +67,10 @@ export default function Header() {
           <button className="icon-btn icon-btn--circle" aria-label="Cart">
             <Heart size={16} />
           </button>
-          <button className="icon-btn icon-btn--circle" aria-label="Cart">
+          <Link to="/cart" className="icon-btn icon-btn--circle cart-btn" aria-label="Cart">
             <ShoppingBag size={16} />
-          </button>
+            {count > 0 && <span className="cart-count">{count}</span>}
+          </Link>
         </nav>
       </div>
 
