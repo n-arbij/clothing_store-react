@@ -30,9 +30,9 @@ export default function Header() {
         <nav className="top-links" aria-label="Secondary">
           <a href="#">About</a>
           <a href="#">FAQs</a>
-          <button className="icon-btn icon-btn--circle" aria-label="Cart">
+          <Link to="/wishlist" className="icon-btn icon-btn--circle" aria-label="Wishlist">
             <Heart size={16} />
-          </button>
+          </Link>
           <Link to="/cart" className="icon-btn icon-btn--circle cart-btn" aria-label="Cart">
             <ShoppingBag size={16} />
             {count > 0 && <span className="cart-count">{count}</span>}
