@@ -1,0 +1,57 @@
+.wish {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 64px 16px;
+  text-align: center;
+  color: #27272a;
+}
+
+/* illustration: open box + floating heart */
+.wish-art {
+  position: relative;
+  display: inline-block;
+  color: #d4d4d8;
+  margin-bottom: 20px;
+}
+
+.wish-art-heart {
+  position: absolute;
+  top: -4px;
+  right: -8px;
+  color: #ef4444;
+}
+
+.wish-title {
+  font-size: 22px;
+  margin: 0 0 8px;
+}
+
+.wish-title span {
+  color: #a1a1aa;
+  font-weight: 400;
+  font-size: 16px;
+}
+
+.wish-sub {
+  color: #71717a;
+  margin: 0 0 28px;
+}
+
+.wish-add {
+  display: inline-block;
+  padding: 12px 32px;
+  border: 1px solid #27272a;
+  color: #27272a;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.wish-add:hover {
+  background: #27272a;
+  color: #fff;
+}
+
+/* populated view */
+.wish--full {
+  text-align: left;
+}
