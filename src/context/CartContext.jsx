@@ -1,58 +1,67 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+
+const KEY = 'epicthrift-cart';
 
 const CartContext = createContext(null);
 
 export function CartProvider({ children }) {
   const [items, setItems] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem('nextgen-cart')) ?? [];
+      return JSON.parse(localStorage.getItem(KEY)) ?? [];
     } catch {
       return [];
     }
   });
 
   useEffect(() => {
-    localStorage.setItem('nextgen-cart', JSON.stringify(items));
+    localStorage.setItem(KEY, JSON.stringify(items));
   }, [items]);
 
-  const addItem = (variantId, quantity = 1) =>
+  // max (optional): the variant's stock, so repeated "Add to cart" clicks can't exceed it
+  const addItem = useCallback((variantId, quantity = 1, max = Infinity) => {
     setItems((prev) => {
       const existing = prev.find((i) => i.variantId === variantId);
-      return existing
-        ? prev.map((i) =>
-            i.variantId === variantId ? { ...i, quantity: i.quantity + quantity } : i
-          )
-        : [...prev, { variantId, quantity, selected: true }];
+      if (existing) {
+        const next = Math.min(existing.quantity + quantity, max);
+        return prev.map((i) => (i.variantId === variantId ? { ...i, quantity: next } : i));
+      }
+      return [...prev, { variantId, quantity: Math.min(quantity, max), selected: true }];
     });
+  }, []);
 
-  const updateQuantity = (variantId, quantity) =>
+  const updateQuantity = useCallback((variantId, quantity) => {
     setItems((prev) =>
       quantity <= 0
         ? prev.filter((i) => i.variantId !== variantId)
         : prev.map((i) => (i.variantId === variantId ? { ...i, quantity } : i))
     );
+  }, []);
 
-  const removeItem = (variantId) =>
+  const removeItem = useCallback((variantId) => {
     setItems((prev) => prev.filter((i) => i.variantId !== variantId));
+  }, []);
 
-  const toggleSelected = (variantId) =>
+  const toggleSelected = useCallback((variantId) => {
     setItems((prev) =>
       prev.map((i) => (i.variantId === variantId ? { ...i, selected: !i.selected } : i))
     );
+  }, []);
 
-  const toggleAll = (selected) =>
+  const toggleAll = useCallback((selected) => {
     setItems((prev) => prev.map((i) => ({ ...i, selected })));
+  }, []);
 
-  const count = items.reduce((n, i) => n + i.quantity, 0);
+  const count = useMemo(() => items.reduce((n, i) => n + i.quantity, 0), [items]);
 
   const value = useMemo(
     () => ({ items, count, addItem, updateQuantity, removeItem, toggleSelected, toggleAll }),
-    [items]
+    [items, count, addItem, updateQuantity, removeItem, toggleSelected, toggleAll]
   );
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useCart() {
   const ctx = useContext(CartContext);
   if (!ctx) throw new Error('useCart must be used within CartProvider');

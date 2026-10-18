@@ -1,27 +1,27 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-// import { useOrders } from '../../context/OrdersContext';
-// import { useProducts } from '../../context/ProductsContext';
-// import { formatPrice } from '../../util/price';
-// import { formatDate } from '../../util/format';
-// import { summarize, lowStock } from '../../util/reports';
+import { useOrders } from '../../context/OrdersContext';
+import { useProducts } from '../../context/ProductsContext';
+import { formatPrice } from '../../util/price';
+import { formatDate } from '../../util/format';
+import { summarize, lowStock } from '../../util/reports';
 import { StatCard, StatusBadge } from './ui';
 
 export default function Dashboard() {
-//   const { listUsers } = useAuth();
-//   const { orders } = useOrders();
-//   const { catalog } = useProducts();
+  const { listUsers } = useAuth();
+  const { orders } = useOrders();
+  const { catalog } = useProducts();
 
-//   const stats = summarize(orders);
-//   const customers = listUsers().filter((u) => u.role === 'customer').length;
-//   const low = lowStock(catalog);
-//   const pending = orders.filter((o) => o.status === 'pending').length;
+  const stats = summarize(orders);
+  const customers = listUsers().filter((u) => u.role === 'customer').length;
+  const low = lowStock(catalog);
+  const pending = orders.filter((o) => o.status === 'pending').length;
 
   return (
     <>
       <h1 className="admin-h1">Dashboard</h1>
 
-      {/* <div className="stats">
+      <div className="stats">
         <StatCard label="Revenue" value={formatPrice(stats.revenue)} hint="excludes cancelled" />
         <StatCard label="Orders" value={stats.orders} hint={`${pending} pending`} />
         <StatCard label="Customers" value={customers} />
@@ -78,7 +78,7 @@ export default function Dashboard() {
             </table>
           )}
         </section>
-    </div> */}
+    </div>
     </>
   );
 }

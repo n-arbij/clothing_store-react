@@ -87,3 +87,13 @@
     grid-template-columns: 1fr;
   }
 }
+
+.my-orders { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.my-orders li { border: 1px solid #e4e4e7; border-radius: 10px; padding: 12px 14px; font-size: 14px; }
+.my-orders li > div { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.my-orders li > div span { color: #71717a; font-size: 13px; }
+.my-orders li p { margin: 6px 0; color: #52525b; font-size: 13px; }
+.my-orders-empty { color: #71717a; font-size: 14px; }
+.my-orders .my-orders-status { text-transform: capitalize; font-weight: 500; color: #3f3f46; }
+.my-orders .my-orders-status--delivered { color: #166534; }
+.my-orders .my-orders-status--cancelled { color: #991b1b; }
