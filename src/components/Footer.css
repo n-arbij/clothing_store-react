@@ -1,0 +1,86 @@
+/* keeps the footer at the bottom of short pages */
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-shell > :not(header):not(footer) {
+  flex: 1;
+}
+
+.footer {
+  background: #18181b;
+  color: #d4d4d8;
+  margin-top: 48px;
+}
+
+.footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 16px 28px;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 32px;
+}
+
+.footer-logo {
+  font-family: 'Pacifico', cursive;
+  font-size: 26px;
+  color: #fff;
+  display: inline-block;
+  margin-bottom: 10px;
+}
+
+.footer-brand p {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #a1a1aa;
+  max-width: 320px;
+}
+
+.footer-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer-col h3 {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.footer-col a {
+  font-size: 14px;
+  color: #a1a1aa;
+}
+
+.footer-col a:hover,
+.footer-logo:hover {
+  color: #fff;
+}
+
+.footer-bottom {
+  border-top: 1px solid #27272a;
+}
+
+.footer-bottom p {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px;
+  font-size: 12px;
+  color: #71717a;
+}
+
+@media (max-width: 640px) {
+  .footer-inner {
+    grid-template-columns: 1fr 1fr;
+  }
+  .footer-brand {
+    grid-column: 1 / -1;
+  }
+}
