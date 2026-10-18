@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import MyOrders from '../components/MyOrders';
 import './Auth.css';
 import './Profile.css';
 
@@ -198,6 +199,8 @@ export default function Profile() {
       </header>
 
       <section className="profile-section">
+        <h2>Your orders</h2>
+        <MyOrders />
         <h2>Personal details</h2>
         {/* key remounts the form with fresh values if the user record changes */}
         <DetailsForm key={user.email + user.name} user={user} updateProfile={updateProfile} />
