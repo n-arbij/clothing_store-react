@@ -13,6 +13,7 @@ import Dashboard from './pages/admin/Dashboard'
 import Products from './pages/admin/Product'
 import ProductForm from './pages/admin/ProductForm'
 import Orders from './pages/admin/Orders'
+import Users from './pages/admin/Users'
 
 function App() {
 
@@ -33,6 +34,7 @@ function App() {
         <Route path='products/new' element={<ProductForm />} />
         <Route path='products/:id/edit' element={<ProductForm />} />
         <Route path='orders' element={<Orders />} />
+        <Route path='users' element={<Users />} />
       </Route>
     </Routes>
     </>
