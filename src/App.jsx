@@ -15,6 +15,7 @@ import ProductForm from './pages/admin/ProductForm'
 import Orders from './pages/admin/Orders'
 import Users from './pages/admin/Users'
 import Reports from './pages/admin/Reports'
+import Footer from './components/Footer'
 
 function App() {
 
@@ -39,6 +40,7 @@ function App() {
         <Route path='reports' element={<Reports />} />
       </Route>
     </Routes>
+    <Footer />
     </>
   )
 }
