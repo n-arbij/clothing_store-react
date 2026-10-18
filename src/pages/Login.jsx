@@ -1,19 +1,21 @@
 import { useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, DEMO_USERS } from '../context/AuthContext';
 import './Auth.css';
+
+const homeFor = (user) => (user.role === 'admin' ? '/admin' : '/profile');
 
 export default function Login() {
   const { user, login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const from = location.state?.from ?? '/profile';
+  const from = location.state?.from;
 
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
-  if (user) return <Navigate to={from} replace />;
+  if (user) return <Navigate to={from ?? homeFor(user)} replace />;
 
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
@@ -22,8 +24,8 @@ export default function Login() {
     setError('');
     setBusy(true);
     try {
-      await login(form);
-      navigate(from, { replace: true });
+      const signedIn = await login(form);
+      navigate(from ?? homeFor(signedIn), { replace: true });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -64,6 +66,16 @@ export default function Login() {
         <p className="auth-switch">
           New here? <Link to="/signup" state={location.state}>Create an account</Link>
         </p>
+
+        {import.meta.env.DEV && (
+          <div className="auth-sub" style={{ marginTop: 16, textAlign: 'center' }}>
+            {DEMO_USERS.map((d) => (
+              <p key={d.email}>
+                {d.role}: {d.email} / {d.password}
+              </p>
+            ))}
+          </div>
+        )}
       </div>
     </main>
   );
