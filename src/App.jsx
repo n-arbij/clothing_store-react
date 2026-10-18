@@ -8,6 +8,8 @@ import Signup from './pages/Signup'
 import ProtectedRoute from './components/ProtectedRoute'
 import Profile from './pages/Profile'
 import WishlistPage from './pages/WishlistPage'
+import Layout from './pages/admin/Layout'
+import Dashboard from './pages/admin/Dashboard'
 
 function App() {
 
@@ -22,6 +24,9 @@ function App() {
       <Route path='/signup' element={<Signup />} />
       <Route path='/profile' element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path='/wishlist' element={<WishlistPage />} />
+      <Route path='/admin' element={<ProtectedRoute roles={['admin']}><Layout /></ProtectedRoute>} >
+        <Route index element={<Dashboard />} />
+      </Route>
     </Routes>
     </>
   )

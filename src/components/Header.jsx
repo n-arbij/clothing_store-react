@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, ShoppingBag, Heart, User} from 'lucide-react';
+import { Search, ShoppingBag, Heart, User, LayoutDashboard} from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import './Header.css';
 
 export default function Header() {
   const [query, setQuery] = useState('');
   const { count } = useCart();
+  const { user, isAdmin } = useAuth();
 
   return (
     <header className="header">
@@ -37,6 +39,11 @@ export default function Header() {
             <ShoppingBag size={16} />
             {count > 0 && <span className="cart-count">{count}</span>}
           </Link>
+          {isAdmin && (
+            <Link to="/admin" className="icon-btn icon-btn--circle" aria-label="Admin" title="Admin">
+              <LayoutDashboard size={16} />
+            </Link>
+          )}
           <Link to="/profile" className="icon-btn icon-btn--circle cart-btn" aria-label="Profile">
             <User size={16} />
           </Link>
