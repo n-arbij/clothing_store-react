@@ -12,6 +12,7 @@ import Layout from './pages/admin/Layout'
 import Dashboard from './pages/admin/Dashboard'
 import Products from './pages/admin/Product'
 import ProductForm from './pages/admin/ProductForm'
+import Orders from './pages/admin/Orders'
 
 function App() {
 
@@ -31,6 +32,7 @@ function App() {
         <Route path='products' element={<Products />} />
         <Route path='products/new' element={<ProductForm />} />
         <Route path='products/:id/edit' element={<ProductForm />} />
+        <Route path='orders' element={<Orders />} />
       </Route>
     </Routes>
     </>

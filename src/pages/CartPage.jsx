@@ -1,7 +1,10 @@
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, X, Minus, Plus, ChevronDown } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { findVariant } from '../util/catalog';
+import { useAuth } from '../context/AuthContext';
+import { useProducts } from '../context/ProductsContext';
+import { useOrders } from '../context/OrdersContext';
 import { formatPrice } from '../util/price';
 import './CartPage.css';
 
@@ -9,6 +12,11 @@ const SHIPPING_CENTS = 1800; // $18 flat — matches the screenshot
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, toggleSelected, toggleAll } = useCart();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { findVariant, adjustStock } = useProducts();
+  const { placeOrder } = useOrders();
+  const [error, setError] = useState('');
 
   const lines = items
     .map((i) => ({ ...i, ...findVariant(i.variantId) }))
@@ -19,6 +27,19 @@ export default function CartPage() {
 
   const subtotal = selected.reduce((s, l) => s + l.variant.price * l.quantity, 0);
   const shipping = selected.length ? SHIPPING_CENTS : 0;
+
+  const handleCheckout = () => {
+    if (!user) return navigate('/login', { state: { from: '/cart' } });
+    const over = selected.find((l) => l.quantity > l.variant.stockQuantity);
+    if (over) {
+      return setError(`Only ${over.variant.stockQuantity} left of ${over.product.name} (${over.variant.color}).`);
+    }
+    setError('');
+    placeOrder({ user, lines: selected, shipping });
+    adjustStock(selected.map((l) => ({ variantId: l.variantId, delta: -l.quantity })));
+    selected.forEach((l) => removeItem(l.variantId));
+    navigate('/profile');
+  };
 
   return (
     <main className="cart">
@@ -126,7 +147,8 @@ export default function CartPage() {
               <strong>{formatPrice(subtotal + shipping)}</strong>
             </div>
 
-            <button className="cart-checkout" disabled={!selected.length}>
+            {error && <p className="form-error" role="alert">{error}</p>}
+            <button className="cart-checkout" disabled={!selected.length} onClick={handleCheckout}>
               CHECK OUT
             </button>
             <button className="cart-paypal">
