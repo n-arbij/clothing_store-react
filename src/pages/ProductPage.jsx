@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ShoppingBag, Heart, Truck, Star, ChevronRight } from 'lucide-react';
 import { formatPrice } from '../util/price';
-import { mockProducts } from '../data/mockProduct'
+import { useProducts } from '../context/ProductsContext';
 import { useCart } from '../context/CartContext';
 import './ProductPage.css';
 
@@ -21,9 +21,7 @@ function StarRating({ rating }) {
   );
 }
 
-export default function ProductPage() {
-  const { slug } = useParams();
-  const { product, variants } = mockProducts.find((p) => p.product.slug === slug);
+function ProductDetail({ product, variants }) {
 
   // one swatch per color (first variant of each color provides its image)
   const colorOptions = [...new Map(variants.map((v) => [v.color, v])).values()];
@@ -51,7 +49,6 @@ export default function ProductPage() {
       </nav>
 
       <div className="pdp-body">
-        {/* ---- gallery ---- */}
         <div className="pdp-gallery">
           <div className="pdp-main">
             <img src={images[imgIndex]} alt={product.name} />
@@ -77,7 +74,6 @@ export default function ProductPage() {
           </div>
         </div>
 
-        {/* ---- info ---- */}
         <div className="pdp-info">
           <div className="pdp-brandrow">
             <span className="pdp-brand">
@@ -164,4 +160,20 @@ export default function ProductPage() {
       </div>
     </main>
   );
+}
+
+export default function ProductPage() {
+  const { slug } = useParams();
+  const { catalog } = useProducts();
+  const entry = catalog.find((p) => p.product.slug === slug);
+
+  if (!entry) {
+    return (
+      <main className="pdp">
+        <p>Product not found. <Link to="/">Back to shop</Link></p>
+      </main>
+    );
+  }
+  // key resets color/size/image state when moving between products
+  return <ProductDetail key={entry.product.id} product={entry.product} variants={entry.variants} />;
 }

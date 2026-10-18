@@ -10,6 +10,8 @@ import Profile from './pages/Profile'
 import WishlistPage from './pages/WishlistPage'
 import Layout from './pages/admin/Layout'
 import Dashboard from './pages/admin/Dashboard'
+import Products from './pages/admin/Product'
+import ProductForm from './pages/admin/ProductForm'
 
 function App() {
 
@@ -26,6 +28,9 @@ function App() {
       <Route path='/wishlist' element={<WishlistPage />} />
       <Route path='/admin' element={<ProtectedRoute roles={['admin']}><Layout /></ProtectedRoute>} >
         <Route index element={<Dashboard />} />
+        <Route path='products' element={<Products />} />
+        <Route path='products/new' element={<ProductForm />} />
+        <Route path='products/:id/edit' element={<ProductForm />} />
       </Route>
     </Routes>
     </>
