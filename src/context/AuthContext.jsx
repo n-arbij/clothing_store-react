@@ -1,13 +1,24 @@
-import { createContext, useCallback, useContext, useMemo, useState, useEffect } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 /*
  * FRONT-END ONLY auth (localStorage). Good for building/testing the UI flows;
- * NOT secure. When a backend exists, keep the same context API and replace the
- * bodies of signup / login / logout / updateProfile / changePassword with fetch calls.
+ * NOT secure — roles are enforced in the browser only, so anyone can edit them in
+ * DevTools. When a backend exists, keep this context API, move every check to the
+ * server, and replace the function bodies with fetch calls.
  */
 
-const USERS_KEY = 'nextgen-users';
-const SESSION_KEY = 'nextgen-session';
+const USERS_KEY = 'epicthrift-users';
+const SESSION_KEY = 'epicthrift-session';
+
+// eslint-disable-next-line react-refresh/only-export-components
+export const ROLES = { CUSTOMER: 'customer', ADMIN: 'admin' };
+
+// Default accounts for development/testing. Remove before going to production.
+// eslint-disable-next-line react-refresh/only-export-components
+export const DEMO_USERS = [
+  { name: 'Demo User', email: 'demo@epicthrift.com', password: 'demo1234', role: ROLES.CUSTOMER },
+  { name: 'Store Admin', email: 'admin@epicthrift.com', password: 'admin1234', role: ROLES.ADMIN },
+];
 
 const readJSON = (key, fallback) => {
   try {
@@ -17,7 +28,9 @@ const readJSON = (key, fallback) => {
   }
 };
 
-const loadUsers = () => readJSON(USERS_KEY, []);
+// accounts created before roles existed become customers
+const loadUsers = () =>
+  readJSON(USERS_KEY, []).map((u) => (u.role ? u : { ...u, role: ROLES.CUSTOMER }));
 const saveUsers = (users) => localStorage.setItem(USERS_KEY, JSON.stringify(users));
 
 const randomSalt = () =>
@@ -34,14 +47,38 @@ const publicUser = ({ passwordHash, salt, ...rest }) => rest; // eslint-disable-
 
 const normEmail = (email) => email.trim().toLowerCase();
 
+async function buildRecord({ name, email, password, role }) {
+  const salt = randomSalt();
+  return {
+    id: crypto.randomUUID(),
+    name: name.trim(),
+    email: normEmail(email),
+    role,
+    phone: '',
+    address: { line1: '', city: '', postalCode: '', country: '' },
+    createdAt: new Date().toISOString(),
+    salt,
+    passwordHash: await hashPassword(password, salt),
+  };
+}
+
+async function seedDemoUsers() {
+  // hash first, then read + save synchronously (avoids double inserts in StrictMode)
+  const records = await Promise.all(DEMO_USERS.map(buildRecord));
+  const users = loadUsers();
+  const missing = records.filter((r) => !users.some((u) => u.email === r.email));
+  if (missing.length) saveUsers([...users, ...missing]);
+}
+
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [userId, setUserId] = useState(() => localStorage.getItem(SESSION_KEY));
   // bump to re-read the user record after profile edits
   const [version, setVersion] = useState(0);
+
   useEffect(() => {
-    seedDemoUser();
+    seedDemoUsers();
   }, []);
 
   const user = useMemo(() => {
@@ -51,30 +88,23 @@ export function AuthProvider({ children }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, version]);
 
+  const isAdmin = user?.role === ROLES.ADMIN;
+
   const startSession = (id) => {
     localStorage.setItem(SESSION_KEY, id);
     setUserId(id);
   };
 
+  // public sign-up always creates a customer
   const signup = useCallback(async ({ name, email, password }) => {
     const users = loadUsers();
-    const e = normEmail(email);
-    if (users.some((u) => u.email === e)) {
+    if (users.some((u) => u.email === normEmail(email))) {
       throw new Error('An account with this email already exists.');
     }
-    const salt = randomSalt();
-    const record = {
-      id: crypto.randomUUID(),
-      name: name.trim(),
-      email: e,
-      phone: '',
-      address: { line1: '', city: '', postalCode: '', country: '' },
-      createdAt: new Date().toISOString(),
-      salt,
-      passwordHash: await hashPassword(password, salt),
-    };
+    const record = await buildRecord({ name, email, password, role: ROLES.CUSTOMER });
     saveUsers([...users, record]);
     startSession(record.id);
+    return publicUser(record);
   }, []);
 
   const login = useCallback(async ({ email, password }) => {
@@ -84,6 +114,7 @@ export function AuthProvider({ children }) {
     if (!found) throw fail();
     if ((await hashPassword(password, found.salt)) !== found.passwordHash) throw fail();
     startSession(found.id);
+    return publicUser(found);
   }, []);
 
   const logout = useCallback(() => {
@@ -97,7 +128,8 @@ export function AuthProvider({ children }) {
       const idx = users.findIndex((u) => u.id === userId);
       if (idx === -1) throw new Error('Not signed in.');
 
-      const next = { ...users[idx], ...changes };
+      // role is never editable through the profile form
+      const next = { ...users[idx], ...changes, role: users[idx].role };
       if (changes.email !== undefined) {
         next.email = normEmail(changes.email);
         if (users.some((u) => u.id !== userId && u.email === next.email)) {
@@ -128,9 +160,29 @@ export function AuthProvider({ children }) {
     [userId]
   );
 
+  // ---- admin-only ----
+  const listUsers = useCallback(() => {
+    if (!isAdmin) throw new Error('Not authorized.');
+    return loadUsers().map(publicUser);
+  }, [isAdmin]);
+
+  const setUserRole = useCallback(
+    async (id, role) => {
+      if (!isAdmin) throw new Error('Not authorized.');
+      if (id === userId) throw new Error("You can't change your own role.");
+      if (!Object.values(ROLES).includes(role)) throw new Error('Unknown role.');
+      const users = loadUsers();
+      const idx = users.findIndex((u) => u.id === id);
+      if (idx === -1) throw new Error('User not found.');
+      users[idx] = { ...users[idx], role };
+      saveUsers(users);
+    },
+    [isAdmin, userId]
+  );
+
   const value = useMemo(
-    () => ({ user, signup, login, logout, updateProfile, changePassword }),
-    [user, signup, login, logout, updateProfile, changePassword]
+    () => ({ user, isAdmin, signup, login, logout, updateProfile, changePassword, listUsers, setUserRole }),
+    [user, isAdmin, signup, login, logout, updateProfile, changePassword, listUsers, setUserRole]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
@@ -141,34 +193,4 @@ export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
-}
-
-// Default account for development/testing. Remove before going to production.
-export const DEMO_USER = {
-  name: 'Demo User',
-  email: 'demo@epicthrift.com',
-  password: 'demo1234',
-};
-
-async function seedDemoUser() {
-  // hash first, then check + save synchronously (avoids a double insert in StrictMode)
-  const salt = randomSalt();
-  const passwordHash = await hashPassword(DEMO_USER.password, salt);
-
-  const users = loadUsers();
-  if (users.some((u) => u.email === DEMO_USER.email)) return;
-
-  saveUsers([
-    ...users,
-    {
-      id: crypto.randomUUID(),
-      name: DEMO_USER.name,
-      email: DEMO_USER.email,
-      phone: '',
-      address: { line1: '', city: '', postalCode: '', country: '' },
-      createdAt: new Date().toISOString(),
-      salt,
-      passwordHash,
-    },
-  ]);
 }
